@@ -17,15 +17,14 @@ library
                      , Preprocessor.Preprocess
                      , Preprocessor.Parser
                      , Preprocessor.Loc
-                     , Preprocessor.SYBUtils
+                     -- , Preprocessor.SYBUtils
                      , Preprocessor.Types
-                     , Preprocessor.Visitor
+                     -- , Preprocessor.Visitor
   build-depends:       base >= 4.7 && < 5
                      , containers
                      , lens
                      , ghc
                      , ghc-paths
-                     , aeson
                      , syb
   default-language:    Haskell2010
   ghc-options:         -Wall

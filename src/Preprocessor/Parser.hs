@@ -1,6 +1,5 @@
 {-# LANGUAGE CPP #-}
-module Preprocessor.Parser (LModule, analyze, parseModule)
-    where
+module Preprocessor.Parser (LModule, parseModule) where
 
 import Control.Monad (void)
 import qualified Control.Exception as E
@@ -18,31 +17,12 @@ import qualified StringBuffer as GHC
 import GHC.Paths (libdir)
 
 import Preprocessor.Preprocess
-import Preprocessor.Visitor (funcsCC)
 import Preprocessor.Types
 import Preprocessor.Loc
 
 -- | Type synonym for a syntax node representing a module tagged with a
 --   'SrcSpan'
 type LModule = GHC.Located (GHC.HsModule GHC.RdrName)
-
-
--- | Parse the code in the given filename and compute cyclomatic complexity for
---   every function binding.
-analyze :: Config    -- ^ Configuration options
-        -> FilePath  -- ^ The filename corresponding to the source code
-        -> IO (FilePath, AnalysisResult)
-analyze conf file = do
-    parseResult <- (do
-        result <- parseModule conf file
-        E.evaluate result) `E.catch` handleExc
-    let analysis = case parseResult of
-                      Left err  -> Left err
-                      Right ast -> Right $ funcsCC ast
-    return (file, analysis)
-
-handleExc :: E.SomeException -> IO (Either String LModule)
-handleExc = return . Left . show
 
 -- | Parse a module with the default instructions for the C pre-processor
 --   Only the includes directory is taken from the config

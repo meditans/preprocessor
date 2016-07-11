@@ -1,4 +1,4 @@
-module Preprocessor.Loc (Loc, srcSpanToLoc, locToString, tagMsg)
+module Preprocessor.Loc (Loc, srcSpanToLoc, tagMsg)
     where
 
 import Text.Printf (printf)
