@@ -1,0 +1,9 @@
+#+TITLE: Cose da fare per preprocessor
+
+* Rendere automatica la lettura del file cabal, se trovato
+* Testare sui pacchetti conosciuti
+* Testare con un file che racchiude tutti i casi possibili
+[11:29 PM] (Channel) f: #define
+[11:29 PM] (Channel) f: #ifndef
+[11:29 PM] (Channel) f: #ifdef
+#define foo ( a ) #a

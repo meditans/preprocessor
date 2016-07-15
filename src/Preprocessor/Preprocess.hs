@@ -27,7 +27,6 @@ data CppOptions = CppOptions
                 , cppFile :: [FilePath]    -- ^ CPP pre-include file
                 }
 
-
 defaultCppOptions :: CppOptions
 defaultCppOptions = CppOptions [] [] []
 

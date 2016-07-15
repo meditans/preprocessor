@@ -11,7 +11,6 @@ import qualified FastString as GHC
 --   represents the following: @(start line, start col)@.
 type Loc = (Int, Int)
 
-
 -- | Convert a GHC's 'SrcSpan' to a @(line, column)@ pair. In case of a GHC's
 --   "bad span" the resulting pair is @(0, 0)@.
 srcSpanToLoc :: GHC.SrcSpan -> Loc
