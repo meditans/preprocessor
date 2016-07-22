@@ -49,14 +49,3 @@ defaultConfig = Config { exts        = []
                        , headers     = []
                        , includeDirs = []
                        }
-
--- | This is the new configuration for the Preprocessor program. It should merge
--- both the Config and the CppOptions. We probably don't need it in the first
--- stage.
-data NewConfig = NewConfig { -- | Extensions to activate, from the cabal file
-                             ncExts :: [String]
-                             -- | Header files to be automatically included before preprocessing
-                           , ncHeaders     :: [FilePath]
-                             -- | Additional include directories for the C preprocessor
-                           , ncIncludeDirs :: [FilePath]
-                           }
