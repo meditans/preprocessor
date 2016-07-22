@@ -55,9 +55,8 @@ findDistDir :: FilePath -> IO FilePath
 findDistDir fp = init <$> readCreateProcess (shell cmd) ""
   where cmd = "cd " ++ fp ++ "; " ++ "cd $(stack path --dist-dir)" ++ "; pwd"
 
-remaining :: FilePath
-remaining = "/build/autogen/cabal_macros.h"
-
 -- | This is the important function; from a file, it generates the cabal macro file to use.
 fromGenericFileToCppMacroFile :: FilePath -> IO FilePath
-fromGenericFileToCppMacroFile fp = (<>) <$> (findProjectDirectory >=> findDistDir) fp <*> pure remaining
+fromGenericFileToCppMacroFile fp = do
+  distDir <- (findProjectDirectory >=> findDistDir) fp
+  return $ distDir <> "/build/autogen/cabal_macros.h"
