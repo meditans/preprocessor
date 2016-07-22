@@ -35,15 +35,6 @@ getPurifiedSource fp = do
   macroFile <- fromGenericFileToCppMacroFile fp
   parseModule' (defaultConfig {headers = [macroFile]}) fp
 
-sempliceCPP :: String
-sempliceCPP = "/home/carlo/code/haskell/preprocessor/src/Preprocessor/Types.hs"
-
-lente :: String
-lente = "/home/carlo/code/haskell/forks/lens-4.14/src/Control/Lens/Plated.hs"
-
-cppMacros :: FilePath
-cppMacros = "/home/carlo/code/haskell/forks/lens-4.14/.stack-work/dist/x86_64-linux/Cabal-1.22.5.0/build/autogen/cabal_macros.h"
-
 -- | The project directory is the one that contains the .cabal file. Takes a
 -- filepath of a file in the project, and traverses the structure until it
 -- founds the .stack-work
