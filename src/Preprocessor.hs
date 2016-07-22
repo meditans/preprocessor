@@ -1,6 +1,6 @@
 {-# OPTIONS_GHC -fdefer-typed-holes #-}
 
-module Lib (getExposedModulesPath, preprocessFile) where
+module Preprocessor (getExposedModulesPath, preprocessFile) where
 
 import           Distribution.ModuleName               (toFilePath)
 import           Distribution.PackageDescription       (condLibrary,
