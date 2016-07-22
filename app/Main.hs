@@ -30,10 +30,13 @@ main = do
   y <- parseModule' (defaultConfig {headers = [macroFile]}) (fileLocation inp)
   putStrLn y
 
+-- | This is intended as the main function of the library. There is currently a
+-- workaround in removing all the lines that begin with #
 getPurifiedSource :: FilePath -> IO String
 getPurifiedSource fp = do
   macroFile <- fromGenericFileToCppMacroFile fp
-  parseModule' (defaultConfig {headers = [macroFile]}) fp
+  rawString <- parseModule (defaultConfig {headers = [macroFile]}) fp
+  return . unlines . filter (not . isPrefixOf "#") . lines $ rawString
 
 -- | The project directory is the one that contains the .cabal file. Takes a
 -- filepath of a file in the project, and traverses the structure until it
