@@ -6,8 +6,7 @@
 module Main where
 
 import Lib
-import Preprocessor.Parser (parseModule')
-import Options.Generic
+import Preprocessor.Parser (parseModule)
 import Preprocessor.Types
 
 import System.FilePath.Posix
@@ -17,18 +16,6 @@ import System.Directory.Extra
 import Data.List
 import Control.Monad
 
-data UserInput = UserInput { fileLocation :: FilePath
-                           -- , cabalMacrosLocation :: FilePath
-                           } deriving (Generic, Show)
-
-instance ParseRecord UserInput
-
-main :: IO ()
-main = do
-  inp <- getRecord "Get file source"
-  macroFile <- fromGenericFileToCppMacroFile (fileLocation inp)
-  y <- parseModule' (defaultConfig {headers = [macroFile]}) (fileLocation inp)
-  putStrLn y
 
 -- | This is intended as the main function of the library. There is currently a
 -- workaround in removing all the lines that begin with #
