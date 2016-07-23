@@ -13,6 +13,10 @@ import qualified MonadUtils   as GHC
 import qualified Outputable   as GHC
 import GHC.Paths (libdir)
 
+# if __GLASGOW_HASKELL__ >= 800
+import qualified Language.Haskell.TH.LanguageExtensions as LE
+# endif
+
 import Preprocessor.Preprocess
 import Preprocessor.Types
 import Preprocessor.Loc
@@ -36,7 +40,11 @@ parseModuleWithCpp :: Config
 parseModuleWithCpp conf cppOptions file =
     GHC.runGhc (Just libdir) $ do
       dflags <- initDynFlags conf file
+#if __GLASGOW_HASKELL__ >= 800
+      let useCpp = GHC.xopt LE.Cpp dflags
+#else
       let useCpp = GHC.xopt GHC.Opt_Cpp dflags
+#endif
       (fileContents, _) <-
         if useCpp
            then getPreprocessedSrcDirect cppOptions file
@@ -57,7 +65,11 @@ initDynFlags conf file = do
     return dflags3
 
 customLogAction :: GHC.LogAction
+#if __GLASGOW_HASKELL__ >= 800
+customLogAction dflags _ severity srcSpan _ m =
+#else
 customLogAction dflags severity srcSpan _ m =
+#endif
     case severity of
       GHC.SevFatal -> throwError
       GHC.SevError -> throwError
