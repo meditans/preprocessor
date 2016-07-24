@@ -1,0 +1,21 @@
+#+TITLE: Preprocessor
+
+Preprocessor is a library to preprocess cpp (a task not usually done by parsing
+libraries like =haskell-src-exts=).
+
+It has a very simple API, consituted of two functions:
+#+BEGIN_SRC haskell
+getExposedModulesPath :: FilePath -> IO [FilePath]
+#+END_SRC
+which, given the path of the =.cabal= file, will return the paths of all the
+exposed files, and
+
+#+BEGIN_SRC haskell
+preprocessFile :: FilePath -> IO String
+#+END_SRC
+which, given the path of a file, should return the content of the files without
+cpp (it tries to automatically find all the required information in the cabal
+project).
+
+The code is still in an alpha state, so please submit issues if you encounter
+any problem! :)
