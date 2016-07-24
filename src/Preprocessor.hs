@@ -56,7 +56,7 @@ fromGenericFileToCppMacroFile fp = do
 
 -- | The project directory is the one that contains the .cabal file. Takes a
 -- filepath of a file in the project, and traverses the structure until it
--- founds the .stack-work as a subdirectory.
+-- founds the directory containing the .cabal file.
 findProjectDirectory :: FilePath -> IO FilePath
 findProjectDirectory fileInProject = do
   let splittedPath  = splitPath fileInProject
@@ -66,7 +66,7 @@ findProjectDirectory fileInProject = do
    containsStackWork :: FilePath -> IO Bool
    containsStackWork dir = do
      ds <- listContents dir
-     return $ any (".stack-work" `isSuffixOf`) ds
+     return $ any (".cabal" `isSuffixOf`) ds
 
 -- | Given a directory (which is meant to be the project directory), gives back
 -- the dist-dir contained in it (it's important because it contains all the
@@ -74,3 +74,8 @@ findProjectDirectory fileInProject = do
 findDistDir :: FilePath -> IO FilePath
 findDistDir fp = init <$> readCreateProcess (shell cmd) ""
   where cmd = "cd " ++ fp ++ "; " ++ "cd $(stack path --dist-dir)" ++ "; pwd"
+
+
+------------ TEST
+
+test = getExposedModulesPath "/home/carlo/code/haskell/forks/lens-4.14/lens.cabal"
