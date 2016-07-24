@@ -17,9 +17,7 @@ library
                      , Preprocessor.Preprocess
                      , Preprocessor.Parser
                      , Preprocessor.Loc
-                     -- , Preprocessor.SYBUtils
                      , Preprocessor.Types
-                     -- , Preprocessor.Visitor
   build-depends:       base >= 4.7 && < 5
                      , Cabal
                      , containers
@@ -28,7 +26,6 @@ library
                      , ghc
                      , ghc-paths
                      , haskell-src-exts
-                     , hse-cpp
                      , lens
                      , mtl
                      , optparse-generic
