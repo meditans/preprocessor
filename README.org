@@ -17,5 +17,8 @@ which, given the path of a file, should return the content of the files without
 cpp (it tries to automatically find all the required information in the cabal
 project).
 
+The ideas on how to treat cpp preprocessing come from =ghc-exactprint= and
+=argon= (both great projects, check them!).
+
 The code is still in an alpha state, so please submit issues if you encounter
 any problem! :)
