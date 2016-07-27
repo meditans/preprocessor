@@ -21,16 +21,19 @@ import           System.Directory.Extra                (listContents)
 import           System.FilePath.Posix
 import           System.Process                        (readCreateProcess,
                                                         readProcess, shell)
+import System.Directory (findFile)
+import Data.Maybe (catMaybes)
 
 -- | Given the cabal file, this returns all the exposed modules of the library,
--- if this is a library. This is one of the two main functions of the modules.
+-- if this is a library. This is one of the two main functions of the module.
 getExposedModulesPath :: FilePath -> IO [FilePath]
 getExposedModulesPath cabalPath = do
   packageDesc <- readPackageDescription silent cabalPath
   let Just lib = condTreeData <$> condLibrary packageDesc
-      modules = map toFilePath . exposedModules $ lib
-      (srcDir:_) = hsSourceDirs $ libBuildInfo lib
-  return $ map (\p -> takeDirectory cabalPath </> srcDir </> p <.> "hs") modules
+      modules = map (++".hs") . map toFilePath . exposedModules $ lib
+      sourceDirs = map (takeDirectory cabalPath </>) . ("" :) . hsSourceDirs $ libBuildInfo lib
+  mbModulesPath <- mapM (findFile sourceDirs) modules
+  return $ catMaybes mbModulesPath
 
 -- | This function finds the location of the cabal macros given the cabal file.
 -- It's currently unused.
