@@ -1,48 +1,41 @@
 {-# OPTIONS_GHC -fdefer-typed-holes #-}
 
-module Preprocessor (getExposedModulesPath, preprocessFile) where
+module Preprocessor (getLibExposedModulesPath, preprocessFile) where
 
-import           Distribution.ModuleName               (toFilePath)
-import           Distribution.PackageDescription       (condLibrary,
-                                                        condTreeData,
-                                                        exposedModules,
-                                                        hsSourceDirs,
-                                                        libBuildInfo)
-import           Distribution.PackageDescription.Parse (readPackageDescription)
-import           Distribution.Verbosity                (silent)
-
-import           Control.Monad                         (filterM, (>=>))
-import           Data.List                             (inits, isPrefixOf,
-                                                        isSuffixOf)
-import           Data.Monoid                           ((<>))
-import           Preprocessor.Parser                   (parseModule)
-import           Preprocessor.Types
-import           System.Directory.Extra                (listContents)
-import           System.FilePath.Posix
-import           System.Process                        (readCreateProcess,
-                                                        readProcess, shell)
-import System.Directory (findFile, makeAbsolute)
-import Data.Maybe (catMaybes)
+import Control.Monad                         (filterM, (>=>))
+import Data.List                             (inits, isPrefixOf, isSuffixOf)
+import Data.Maybe                            (catMaybes, isNothing)
+import Data.Monoid                           ((<>))
+import Distribution.ModuleName               (toFilePath)
+import Distribution.PackageDescription
+    (condLibrary, condTreeData, exposedModules, hsSourceDirs, libBuildInfo)
+import Distribution.PackageDescription.Parse (readPackageDescription)
+import Distribution.Verbosity                (silent)
+import Preprocessor.Parser                   (parseModule)
+import Preprocessor.Types
+import System.Directory                      (findFile, makeAbsolute)
+import System.Directory.Extra                (listContents)
 import System.FilePath.Find
+import System.FilePath.Posix
+import System.Process                        (readCreateProcess, shell)
+
+-- | ProjectDir is the directory which contains the .cabal file for the project
+type ProjectDir    = FilePath
+type CabalFilePath = FilePath
 
 -- | Given the cabal file, this returns all the exposed modules of the library,
 -- if this is a library. This is one of the two main functions of the module.
-getExposedModulesPath :: FilePath -> IO [FilePath]
-getExposedModulesPath cabalPath = do
+getLibExposedModulesPath :: CabalFilePath -> IO [FilePath]
+getLibExposedModulesPath cabalPath = do
   packageDesc <- readPackageDescription silent cabalPath
   let Just lib = condTreeData <$> condLibrary packageDesc
       modules = map (++".hs") . map toFilePath . exposedModules $ lib
       sourceDirs = map (takeDirectory cabalPath </>) . ("" :) . hsSourceDirs $ libBuildInfo lib
   mbModulesPath <- mapM (findFile sourceDirs) modules
+  if any isNothing mbModulesPath
+    then print "Error in exposed modules retrieving"
+    else return ()
   return $ catMaybes mbModulesPath
-
--- | This function finds the location of the cabal macros given the cabal file.
--- It's currently unused.
-findCabalMacros :: FilePath -> IO String
-findCabalMacros cabalPath = do
-  relPath <- init <$> readProcess "stack" ["path", "--dist-dir"] ""
-  let absPath = takeDirectory cabalPath
-  return $ absPath </> relPath
 
 -- | This is intended as the main function of the library. There is currently a
 -- workaround in removing all the lines that begin with #
@@ -64,28 +57,22 @@ fromGenericFileToCppMacroFile fp = do
 -- | The project directory is the one that contains the .cabal file. Takes a
 -- filepath of a file in the project, and traverses the structure until it
 -- founds the directory containing the .cabal file.
-findProjectDirectory :: FilePath -> IO FilePath
+findProjectDirectory :: FilePath -> IO ProjectDir
 findProjectDirectory fileInProject = do
   let splittedPath  = splitPath fileInProject
       possiblePaths = map joinPath $ init $ tail $ inits splittedPath
-  head <$> filterM containsStackWork possiblePaths
+  head <$> filterM containsCabalFile possiblePaths
  where
-   containsStackWork :: FilePath -> IO Bool
-   containsStackWork dir = do
-     ds <- listContents dir
-     return $ any (".cabal" `isSuffixOf`) ds
+   containsCabalFile :: FilePath -> IO Bool
+   containsCabalFile dir = any (".cabal" `isSuffixOf`) <$> listContents dir
 
 -- | Given a directory (which is meant to be the project directory), gives back
 -- the dist-dir contained in it (it's important because it contains all the
 -- macros).
-findDistDir :: FilePath -> IO FilePath
+findDistDir :: ProjectDir -> IO FilePath
 findDistDir fp = init <$> readCreateProcess (shell cmd) ""
   where cmd = "cd " ++ fp ++ "; " ++ "cd $(stack path --dist-dir)" ++ "; pwd"
 
-
------------- TEST
-
-test = getExposedModulesPath "/home/carlo/code/haskell/forks/lens-4.14/lens.cabal"
 -- | Given the project directory, tries to find additional .h files (which could
 -- be additional macros). For now, it just finds, recursively, every .h file
 -- which is not cabal-macros.h
