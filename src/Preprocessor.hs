@@ -48,9 +48,12 @@ findCabalMacros cabalPath = do
 -- workaround in removing all the lines that begin with #
 preprocessFile :: FilePath -> IO String
 preprocessFile fp = do
-  macroFile <- fromGenericFileToCppMacroFile fp
-  rawString <- parseModule (defaultConfig {headers = [macroFile]}) fp
-  return . unlines . filter (not . isPrefixOf "#") . lines $ rawString
+  projectDir   <- findProjectDirectory fp
+  macroFile    <- fromGenericFileToCppMacroFile fp
+  includeFiles <- allHFiles projectDir >>= mapM (\x -> takeDirectory <$> makeAbsolute x)
+  rawString    <- parseModule (defaultConfig {headers = [macroFile], includeDirs = includeFiles}) fp
+  let filteredString = unlines . filter (not . isPrefixOf "#") . lines $ rawString
+  return filteredString
 
 -- | This is the important function; from a file, it generates the cabal macro file to use.
 fromGenericFileToCppMacroFile :: FilePath -> IO FilePath
@@ -83,3 +86,8 @@ findDistDir fp = init <$> readCreateProcess (shell cmd) ""
 ------------ TEST
 
 test = getExposedModulesPath "/home/carlo/code/haskell/forks/lens-4.14/lens.cabal"
+-- | Given the project directory, tries to find additional .h files (which could
+-- be additional macros). For now, it just finds, recursively, every .h file
+-- which is not cabal-macros.h
+allHFiles :: ProjectDir -> IO [FilePath]
+allHFiles root = find always (extension ==? ".h" &&? fileName /=? "cabal_macros.h") root
