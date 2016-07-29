@@ -21,8 +21,9 @@ import           System.Directory.Extra                (listContents)
 import           System.FilePath.Posix
 import           System.Process                        (readCreateProcess,
                                                         readProcess, shell)
-import System.Directory (findFile)
+import System.Directory (findFile, makeAbsolute)
 import Data.Maybe (catMaybes)
+import System.FilePath.Find
 
 -- | Given the cabal file, this returns all the exposed modules of the library,
 -- if this is a library. This is one of the two main functions of the module.
