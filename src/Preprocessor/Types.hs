@@ -1,22 +1,19 @@
-{-# LANGUAGE CPP #-}
-{-# LANGUAGE TypeSynonymInstances #-}
-{-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE CPP, DeriveGeneric, FlexibleInstances, OverloadedStrings #-}
+{-# LANGUAGE TypeSynonymInstances                                     #-}
 
 #if __GLASGOW_HASKELL__ < 710
 {-# LANGUAGE DeriveDataTypeable #-}
 #endif
 
-module Preprocessor.Types ( Config(..) , GhcParseError(..), defaultConfig)
-    where
+-- module Preprocessor.Types (Config(..) , GhcParseError(..), defaultConfig, CabalFilePath, ProjectDir) where
+module Preprocessor.Types where
 
-import Data.List (intercalate)
-import Data.Typeable
 import Control.Exception (Exception)
+import Data.List         (intercalate)
+import Data.Typeable
 
-import Preprocessor.Loc
 import Options.Generic
+import Preprocessor.Loc
 
 -- | Parsing errors
 data GhcParseError = GhcParseError { loc :: Loc
@@ -49,3 +46,7 @@ defaultConfig = Config { exts        = []
                        , headers     = []
                        , includeDirs = []
                        }
+
+-- | ProjectDir is the directory which contains the .cabal file for the project
+type ProjectDir    = FilePath
+type CabalFilePath = FilePath
