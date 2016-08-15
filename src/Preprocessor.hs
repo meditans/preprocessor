@@ -132,7 +132,7 @@ discardUnusefulComponents _ [] =
   error "The function discardUnusefulComponents expects a non-empty list of components"
 discardUnusefulComponents _ (c:[]) = [c]
 discardUnusefulComponents fp cs =
-  dropWhile (\c -> filePath (lineMarker c) /= fp) (tail cs)
+  filter (\c -> filePath (lineMarker c) /= fp) (tail cs)
 
 -- | Adds padding to the source blocks to mantain the correct line numbers of
 -- the source code.
