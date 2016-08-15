@@ -1,13 +1,14 @@
 name:                preprocessor
-version:             0.1.0.0
-synopsis:            Personal project
+version:             0.1.0
+synopsis:            Remove cpp annotations to get the source ready for parsing
 description:         Please see README.md
 homepage:            http://github.com/meditans/preprocessor#readme
-license:             AllRightsReserved
+license:             MIT
+license-file:        LICENSE              
 author:              Carlo Nucera
 maintainer:          meditans@gmail.com
 copyright:           2016 Carlo Nucera
-category:            Development
+category:            Source Code Analysis
 build-type:          Simple
 cabal-version:       >=1.10
 
@@ -20,19 +21,14 @@ library
                      , Preprocessor.Types
   build-depends:       base >= 4.7 && < 5
                      , Cabal
-                     , containers
+                     , directory
                      , extra
+                     , filemanip
                      , filepath
                      , ghc
                      , ghc-paths
-                     , haskell-src-exts
-                     , lens
-                     , mtl
                      , optparse-generic
                      , process
-                     , syb
-                     , directory
-                     , filemanip
   if impl(ghc >= 8.0)
     build-depends:     template-haskell
   default-language:    Haskell2010
