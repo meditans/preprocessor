@@ -8,23 +8,7 @@
 -- module Preprocessor.Types (Config(..) , GhcParseError(..), defaultConfig, CabalFilePath, ProjectDir) where
 module Preprocessor.Types where
 
-import Control.Exception (Exception)
-import Data.List         (intercalate)
-import Data.Typeable
-
 import Options.Generic
-import Preprocessor.Loc
-
--- | Parsing errors
-data GhcParseError = GhcParseError { loc :: Loc
-                                   , msg :: String
-                                   } deriving (Typeable)
-
-instance Exception GhcParseError
-
-instance Show GhcParseError where
-    show e = tagMsg (loc e) $ fixNewlines (msg e)
-        where fixNewlines = intercalate "\n\t\t" . lines
 
 -- | Type holding all the options passed from the command line.
 data Config = Config {
