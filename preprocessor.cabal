@@ -18,6 +18,7 @@ library
                      , Preprocessor.Preprocess
                      , Preprocessor.Parser
                      , Preprocessor.Types
+                     , Preprocessor.CppOutput
   build-depends:       base >= 4.7 && < 5
                      , Cabal
                      , directory
