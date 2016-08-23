@@ -9,7 +9,7 @@ import qualified GHC hiding (parseModule)
 import qualified DynFlags     as GHC
 import qualified HeaderInfo   as GHC
 import qualified MonadUtils   as GHC
-import GHC.Paths (libdir)
+import qualified GHC.Paths  as GHC
 
 # if __GLASGOW_HASKELL__ >= 800
 import qualified Language.Haskell.TH.LanguageExtensions as LE
@@ -23,29 +23,25 @@ import Preprocessor.Types
 --   version which returns the string of the parsed file.
 parseModule :: Config -> FilePath -> IO String
 parseModule conf = parseModuleWithCpp conf $
-    defaultCppOptions { cppInclude = includeDirs conf
-                      , cppFile    = headers conf
-                      }
+    emptyCppOptions { cppInclude = includeDirs conf
+                    , cppFile    = headers conf
+                    }
 
 -- | Parse a module with specific instructions for the C pre-processor. This is
 -- a modified version, which exports the string of the file, without parsing it
 -- with the ghc api.
 parseModuleWithCpp :: Config -> CppOptions -> FilePath -> IO String
-parseModuleWithCpp conf cppOptions file =
-    GHC.runGhc (Just libdir) $ do
-      dflags <- initDynFlags conf file
+parseModuleWithCpp conf cppOptions file = GHC.runGhc (Just GHC.libdir) $ do
+  dflags <- initDynFlags conf file
 #if __GLASGOW_HASKELL__ >= 800
-      let useCpp = GHC.xopt LE.Cpp dflags
+  let useCpp = GHC.xopt LE.Cpp dflags
 #else
-      let useCpp = GHC.xopt GHC.Opt_Cpp dflags
+  let useCpp = GHC.xopt GHC.Opt_Cpp dflags
 #endif
-      (fileContents, _) <-
-        if useCpp
-           then getPreprocessedSrcDirect cppOptions file
-           else do
-               contents <- GHC.liftIO $ readFile file
-               return (contents, dflags)
-      return $ fileContents
+  fileContents <- if useCpp
+                  then getPreprocessedSrcDirect cppOptions file
+                  else GHC.liftIO (readFile file)
+  return fileContents
 
 initDynFlags :: GHC.GhcMonad m => Config -> FilePath -> m GHC.DynFlags
 initDynFlags conf file = do

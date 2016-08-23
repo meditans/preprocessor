@@ -1,59 +1,87 @@
--- The following code is taken and modified from ghc-exactprint, because adding
--- a dependency for just one module and then adding wrappers for that module
--- seemed excessive.
-{-# LANGUAGE CPP #-}
-{-# LANGUAGE RecordWildCards #-}
--- | This module provides support for CPP and interpreter directives.
+{-# LANGUAGE CPP, RecordWildCards #-}
+
+{-|
+Module      : Preprocessor.Preprocess
+Description : Call GHC.preprocess at the Cpp phase
+Copyright   : (c) Carlo Nucera, 2016
+License     : BSD3
+Maintainer  : meditans@gmail.com
+Stability   : experimental
+Portability : POSIX
+
+The main function exported by this module, 'getPreprocessedSrcDirect', is a
+wrapper around Ghc's 'GHC.preprocess'.
+-}
+
 module Preprocessor.Preprocess
-   (
-     CppOptions(..)
-   , defaultCppOptions
+   ( CppOptions(..)
+   , emptyCppOptions
    , getPreprocessedSrcDirect
    ) where
 
+import Lens.Micro
 #if __GLASGOW_HASKELL__ < 710
 import Control.Applicative ((<$>))
 #endif
-import qualified GHC
-import qualified DynFlags       as GHC
-import qualified MonadUtils     as GHC
+
 import qualified DriverPhases   as GHC
 import qualified DriverPipeline as GHC
+import qualified DynFlags       as GHC
+import qualified GHC
 import qualified HscTypes       as GHC
+import qualified MonadUtils     as GHC
 
+--------------------------------------------------------------------------------
+-- Data types declaration
+--------------------------------------------------------------------------------
+
+-- These are the CppOptions. Are all these options necessary?
 data CppOptions = CppOptions
-                { cppDefine :: [String]    -- ^ CPP #define macros
+                { cppDefine  :: [String]   -- ^ CPP #define macros
                 , cppInclude :: [FilePath] -- ^ CPP Includes directory
-                , cppFile :: [FilePath]    -- ^ CPP pre-include file
-                }
+                , cppFile    :: [FilePath] -- ^ CPP pre-include file
+                } deriving (Show)
 
-defaultCppOptions :: CppOptions
-defaultCppOptions = CppOptions [] [] []
+-- |
+-- >>> emptyCppOptions
+-- CppOptions {cppDefine = [], cppInclude = [], cppFile = []}
+emptyCppOptions :: CppOptions
+emptyCppOptions = CppOptions [] [] []
 
-getPreprocessedSrcDirect :: (GHC.GhcMonad m)
-                         => CppOptions
-                         -> FilePath
-                         -> m (String, GHC.DynFlags)
+--------------------------------------------------------------------------------
+-- Main functions
+--------------------------------------------------------------------------------
+
+-- | Invoke the Ghc's 'GHC.preprocess' function at the cpp phase, adding the
+-- options specified in the first argument.
+getPreprocessedSrcDirect :: GHC.GhcMonad m => CppOptions -> FilePath -> m String
 getPreprocessedSrcDirect cppOptions file = do
-  hscEnv <- GHC.getSession
-  let dfs = GHC.hsc_dflags hscEnv
-      newEnv = hscEnv { GHC.hsc_dflags = injectCppOptions cppOptions dfs }
-  (dflags', hspp_fn) <-
-      GHC.liftIO $ GHC.preprocess newEnv (file, Just (GHC.Cpp GHC.HsSrcFile))
-  txt <- GHC.liftIO $ readFile hspp_fn
-  return (txt, dflags')
-
-injectCppOptions :: CppOptions -> GHC.DynFlags -> GHC.DynFlags
-injectCppOptions CppOptions{..} dflags =
-  foldr addOptP dflags (map mkDefine cppDefine ++ map mkIncludeDir cppInclude
-                                               ++ map mkInclude cppFile)
+  hscEnv <- injectCppOptions cppOptions <$> GHC.getSession
+  (_, tempFile) <- GHC.liftIO $ GHC.preprocess hscEnv (file, cppPhase)
+  GHC.liftIO (readFile tempFile)
   where
-    mkDefine     = ("-D" ++)
-    mkIncludeDir = ("-I" ++)
-    mkInclude    = ("-include" ++)
+    cppPhase = Just (GHC.Cpp GHC.HsSrcFile)
 
-addOptP :: String -> GHC.DynFlags -> GHC.DynFlags
-addOptP f = alterSettings (\s -> s { GHC.sOpt_P   = f : GHC.sOpt_P s})
+injectCppOptions :: CppOptions -> GHC.HscEnv -> GHC.HscEnv
+injectCppOptions CppOptions{..} = over (_hsc_dflags . _settings . _sOpt_P)
+                                       (encodedOptions ++)
+  where
+    encodedOptions = map ("-D" ++) cppDefine
+                  ++ map ("-I" ++) cppInclude
+                  ++ map ("-include" ++) cppFile
 
-alterSettings :: (GHC.Settings -> GHC.Settings) -> GHC.DynFlags -> GHC.DynFlags
-alterSettings f dflags = dflags { GHC.settings = f (GHC.settings dflags) }
+--------------------------------------------------------------------------------
+-- Some lenses to manipulate conveniently a HscEnv value
+--------------------------------------------------------------------------------
+
+_hsc_dflags :: Lens' GHC.HscEnv GHC.DynFlags
+_hsc_dflags = lens GHC.hsc_dflags
+                   (\hscEnv dynFlags -> hscEnv {GHC.hsc_dflags = dynFlags})
+
+_settings :: Lens' GHC.DynFlags GHC.Settings
+_settings = lens GHC.settings
+                 (\dynFlags setting -> dynFlags {GHC.settings = setting})
+
+_sOpt_P :: Lens' GHC.Settings [String]
+_sOpt_P = lens GHC.sOpt_P
+               (\setting strings -> setting {GHC.sOpt_P = strings})
