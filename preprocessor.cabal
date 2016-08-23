@@ -28,7 +28,6 @@ library
                      , ghc
                      , ghc-paths
                      , microlens
-                     , optparse-generic
                      , process
   if impl(ghc >= 8.0)
     build-depends:     template-haskell

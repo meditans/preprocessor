@@ -1,11 +1,10 @@
 {-# LANGUAGE ViewPatterns #-}
-{-# OPTIONS_GHC -fdefer-typed-holes #-}
 
-module Preprocessor (getLibExposedModulesPath, preprocessFile, CabalFilePath) where
+module Preprocessor (getLibExposedModulesPath, preprocessFile) where
 
 import Control.Monad                         (filterM, (>=>))
 import Data.List                             (inits, isSuffixOf)
-import Data.Maybe                            (catMaybes, isNothing)
+import Data.Maybe                            (catMaybes)
 import Data.Monoid                           ((<>))
 import Distribution.ModuleName               (toFilePath)
 import Distribution.PackageDescription       (condLibrary, condTreeData,
@@ -13,9 +12,10 @@ import Distribution.PackageDescription       (condLibrary, condTreeData,
                                              libBuildInfo)
 import Distribution.PackageDescription.Parse (readPackageDescription)
 import Distribution.Verbosity                (silent)
-import Preprocessor.Parser                   (parseModule)
-import Preprocessor.Types
+import Preprocessor.Parser                   (parseModuleWithCpp)
+import Preprocessor.Types                    (CabalFilePath, ProjectDir)
 import Preprocessor.CppOutput
+import Preprocessor.Preprocess
 import System.Directory                      (findFile, makeAbsolute)
 import System.Directory.Extra                (listContents)
 import System.FilePath.Find                  (always, extension, fileName, find,
@@ -33,10 +33,7 @@ getLibExposedModulesPath cabalPath = do
       modules = map (++".hs") . map toFilePath . exposedModules $ lib
       sourceDirs = map (takeDirectory cabalPath </>) . ("" :) . hsSourceDirs $ libBuildInfo lib
   mbModulesPath <- mapM (findFile sourceDirs) modules
-  if any isNothing mbModulesPath
-    then print "Error in exposed modules retrieving"
-    else return ()
-  return $ catMaybes mbModulesPath
+  return (catMaybes mbModulesPath)
 
 -- | This is intended as the main function of the library. There is currently a
 -- workaround in removing all the lines that begin with #
@@ -44,24 +41,28 @@ preprocessFile :: FilePath -> IO String
 preprocessFile fp = do
   projectDir   <- findProjectDirectory fp
   macroFile    <- fromGenericFileToCppMacroFile fp
-  includeFiles <- allHFiles projectDir >>= mapM (\x -> takeDirectory <$> makeAbsolute x)
-  rawString    <- parseModule (defaultConfig { headers     = [macroFile]
-                                             , includeDirs = includeFiles}) fp
+  includeFiles <- allDotHFiles projectDir >>= mapM (\x -> takeDirectory <$> makeAbsolute x)
+  rawString    <- parseModuleWithCpp (emptyCppOptions { cppFile    = [macroFile]
+                                               , cppInclude = includeFiles }) fp
   return . unlines
          . reconstructSource
          . discardUnusefulComponents fp
          . parseCppOutputComponents
          . lines $ rawString
 
--- | This is the important function; from a file, it generates the cabal macro file to use.
+--------------------------------------------------------------------------------
+-- Functions to locate the various paths
+--------------------------------------------------------------------------------
+
+-- | From a file position, it locates the cabal macro file (cabal_macros.h) to
+-- use.
 fromGenericFileToCppMacroFile :: FilePath -> IO FilePath
 fromGenericFileToCppMacroFile fp = do
   distDir <- (findProjectDirectory >=> findDistDir) fp
   return $ distDir <> "/build/autogen/cabal_macros.h"
 
 -- | The project directory is the one that contains the .cabal file. Takes a
--- filepath of a file in the project, and traverses the structure until it
--- founds the directory containing the .cabal file.
+-- filepath of a file in the project.
 findProjectDirectory :: FilePath -> IO ProjectDir
 findProjectDirectory fileInProject = do
   let splittedPath  = splitPath fileInProject
@@ -78,10 +79,9 @@ findDistDir :: ProjectDir -> IO FilePath
 findDistDir fp = init <$> readCreateProcess (shell cmd) ""
   where cmd = "cd " ++ fp ++ "; " ++ "cd $(stack path --dist-dir)" ++ "; pwd"
 
--- | Given the project directory, tries to find additional .h files (which could
--- be additional macros). For now, it just finds, recursively, every .h file
--- which is not cabal-macros.h
-allHFiles :: ProjectDir -> IO [FilePath]
-allHFiles root = find always (extension ==? ".h" &&? fileName /=? "cabal_macros.h") root
-
+-- | Given the project directory, finds the directories in which additional .h
+-- files (which could be additional macros) are stored.
+allDotHFiles :: ProjectDir -> IO [FilePath]
+allDotHFiles root = find always isDotH root
   where
+    isDotH = (extension ==? ".h" &&? fileName /=? "cabal_macros.h")
