@@ -1,7 +1,7 @@
 {-# LANGUAGE ViewPatterns #-}
 
 {-|
-Module      : Preprocessor.CppOutput
+Module      : Preprocessor.Internal.CppOutput
 Description : Parsing of the Cpp output
 Copyright   : (c) Carlo Nucera, 2016
 License     : BSD3
@@ -32,7 +32,7 @@ between the linemarkers, and reconstruct the file using only blank lines,
 so that line numbers between source and processed file match up.
 -}
 
-module Preprocessor.CppOutput where
+module Preprocessor.Internal.CppOutput where
 
 import Data.Char       (isDigit)
 import Data.List       (isPrefixOf, isSuffixOf)

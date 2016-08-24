@@ -1,7 +1,7 @@
 {-# LANGUAGE CPP, RecordWildCards #-}
 
 {-|
-Module      : Preprocessor.Preprocess
+Module      : Preprocessor.Internal.Preprocess
 Description : Call GHC.preprocess at the Cpp phase
 Copyright   : (c) Carlo Nucera, 2016
 License     : BSD3
@@ -13,7 +13,7 @@ The main function exported by this module, 'getPreprocessedSrcDirect', is a
 wrapper around Ghc's 'GHC.preprocess'.
 -}
 
-module Preprocessor.Preprocess
+module Preprocessor.Internal.Preprocess
    ( CppOptions(..)
    , emptyCppOptions
    , getPreprocessedSrcDirect

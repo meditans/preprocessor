@@ -1,7 +1,7 @@
 {-# LANGUAGE CPP #-}
 
 {-|
-Module      : Preprocessor.Parser
+Module      : Preprocessor.Internal.Parser
 Description : Initializes the flags and calls getPreprocessedSrcDirect
 Copyright   : (c) Carlo Nucera, 2016
 License     : BSD3
@@ -10,11 +10,11 @@ Stability   : experimental
 Portability : POSIX
 -}
 
-module Preprocessor.Parser (parseModuleWithCpp) where
+module Preprocessor.Internal.Parser (parseModuleWithCpp) where
 
 import Control.Monad           (void)
 import Data.Tuple.Extra        (fst3)
-import Preprocessor.Preprocess
+import Preprocessor.Internal.Preprocess
 
 import qualified DynFlags   as GHC
 import qualified GHC        hiding (parseModule)

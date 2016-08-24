@@ -2,7 +2,7 @@ module Main where
 
 import Language.Haskell.Exts
 import Preprocessor
-import Preprocessor.Types (CabalFilePath)
+import Preprocessor.Internal.Types (CabalFilePath)
 import Test.Hspec
 
 import Control.Exception (bracket)

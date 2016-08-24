@@ -12,10 +12,10 @@ import Distribution.PackageDescription       (condLibrary, condTreeData,
                                              libBuildInfo)
 import Distribution.PackageDescription.Parse (readPackageDescription)
 import Distribution.Verbosity                (silent)
-import Preprocessor.Parser                   (parseModuleWithCpp)
-import Preprocessor.Types                    (CabalFilePath, ProjectDir)
-import Preprocessor.CppOutput
-import Preprocessor.Preprocess
+import Preprocessor.Internal.CppOutput
+import Preprocessor.Internal.Parser          (parseModuleWithCpp)
+import Preprocessor.Internal.Preprocess
+import Preprocessor.Internal.Types           (CabalFilePath, ProjectDir)
 import System.Directory                      (findFile, makeAbsolute)
 import System.Directory.Extra                (listContents)
 import System.FilePath.Find                  (always, extension, fileName, find,
@@ -43,7 +43,7 @@ preprocessFile fp = do
   macroFile    <- fromGenericFileToCppMacroFile fp
   includeFiles <- allDotHFiles projectDir >>= mapM (\x -> takeDirectory <$> makeAbsolute x)
   rawString    <- parseModuleWithCpp (emptyCppOptions { cppFile    = [macroFile]
-                                               , cppInclude = includeFiles }) fp
+                                                      , cppInclude = includeFiles }) fp
   return . unlines
          . reconstructSource
          . discardUnusefulComponents fp
