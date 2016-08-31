@@ -42,7 +42,7 @@ import Distribution.PackageDescription       (condLibrary, condTreeData,
                                              libBuildInfo)
 import Distribution.PackageDescription.Parse (readPackageDescription)
 import Distribution.Verbosity                (silent)
-import Preprocessor.Internal.AddPadding
+import Preprocessor.Internal.AddPadding      (addPadding)
 import Preprocessor.Internal.Preprocess      (parseModuleWithCpp)
 import Preprocessor.Internal.Types           (CabalFilePath, CppOptions (..),
                                              ProjectDir, emptyCppOptions)
@@ -74,11 +74,7 @@ preprocessFile fp = do
   includeFiles <- allDotHFiles projectDir >>= mapM (\x -> takeDirectory <$> makeAbsolute x)
   rawString    <- parseModuleWithCpp (emptyCppOptions { cppFile    = [macroFile]
                                                       , cppInclude = includeFiles }) fp
-  return . unlines
-         . reconstructSource
-         . discardUnusefulComponents fp
-         . parseCppOutputComponents
-         . lines $ rawString
+  return $ addPadding fp rawString
 
 --------------------------------------------------------------------------------
 -- Functions to locate the various paths

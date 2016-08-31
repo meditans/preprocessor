@@ -29,11 +29,41 @@ in `CppOutputComponents` (the source chunks between the linemarkers), and pad
 them with the appropriate amount of blank lines.
 -}
 
-module Preprocessor.Internal.AddPadding where
+module Preprocessor.Internal.AddPadding
+  (
+  -- * Entry point for padding
+    addPadding
+  -- * Data Types
+  , LineMarker (..)
+  , isLineMarker
+  , parseLineMarker
+  , CppOutputComponent (..)
+  -- * Stages of padding
+  , parseCppOutputComponents
+  , discardUnusefulComponents
+  , reconstructSource
+  ) where
 
 import Data.Char       (isDigit)
 import Data.List       (isPrefixOf, isSuffixOf)
 import Data.List.Extra (repeatedly)
+
+--------------------------------------------------------------------------------
+-- Entry point for padding
+--------------------------------------------------------------------------------
+
+-- | Substitutes the lineMarker in the content of a file with the appropriate
+-- blank line padding.
+addPadding :: FilePath -> String -> String
+addPadding fp = unlines
+              . reconstructSource
+              . discardUnusefulComponents fp
+              . parseCppOutputComponents
+              . lines
+
+--------------------------------------------------------------------------------
+-- Data Types
+--------------------------------------------------------------------------------
 
 -- | A 'LineMarker' follows the structure described
 -- <https://gcc.gnu.org/onlinedocs/cpp/Preprocessor-Output.html here>. We only
@@ -43,13 +73,6 @@ import Data.List.Extra (repeatedly)
 data LineMarker = LineMarker { beginsAtLine :: Int
                              , filePath     :: FilePath
                              } deriving (Show)
-
--- | A 'CppOutputComponent' is constituted by a 'LineMarker' and the block of
--- code till the next 'LineMarker'.
-data CppOutputComponent = CppOutputComponent { lineMarker  :: LineMarker
-                                             , sourceBlock :: [String]
-                                             } deriving (Show)
-
 -- |
 -- >>> isLineMarker "# 42 \"/path/to/file\""
 -- True
@@ -66,6 +89,16 @@ isLineMarker _                           = False
 parseLineMarker :: String -> LineMarker
 parseLineMarker s = LineMarker (read $ words s !! 1) (unquote $ words s !! 2)
   where unquote = tail . init
+
+-- | A 'CppOutputComponent' is constituted by a 'LineMarker' and the block of
+-- code till the next 'LineMarker'.
+data CppOutputComponent = CppOutputComponent { lineMarker  :: LineMarker
+                                             , sourceBlock :: [String]
+                                             } deriving (Show)
+
+--------------------------------------------------------------------------------
+-- Stages of padding
+--------------------------------------------------------------------------------
 
 -- | Given the lines of a file, parses the CppOutputComponents. Note that a file
 -- that doesn't need cpp preprocessing doesn't have any 'LineMarker'. In that
