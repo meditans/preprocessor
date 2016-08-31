@@ -73,13 +73,13 @@ preprocessFile :: FilePath -> IO String
 preprocessFile fp = do
   projectDir <- findProjectDirectory fp
   macroFile <- fromGenericFileToCppMacroFile fp
-  includeFiles <-
+  includeDirs <-
     allDotHFiles projectDir >>= mapM (\x -> takeDirectory <$> makeAbsolute x)
   rawString <-
     parseModuleWithCpp
       (emptyCppOptions
        { cppFile = [macroFile]
-       , cppInclude = includeFiles
+       , cppInclude = includeDirs
        })
       fp
   return $ addPadding fp rawString
