@@ -2,16 +2,15 @@
 
 {-|
 Module      : Preprocessor
-Description : Preprocess the cpp of a haskell source to do static analysis
+Description : Preprocess cpp directives in haskell source code.
 Copyright   : (c) Carlo Nucera, 2016
 License     : BSD3
 Maintainer  : meditans@gmail.com
 Stability   : experimental
 Portability : POSIX
 
-Preprocessor preprocesses the cpp in the source of a haskell library (a task not
-usually done by parsing libraries) to prepare for a static analysis of the code,
-e.g. with
+This library preprocesses the cpp directives in haskell source code (a task not
+usually done by parsing libraries), to prepare it for static analysis, e.g. with
 <http://hackage.haskell.org/package/haskell-src-exts haskell-src-exts>.
 
 The design of the library is guided by two principles:
@@ -32,6 +31,11 @@ The files marked as internal are exported for documentation purposes only.
 -}
 module Preprocessor (getLibExposedModulesPath, preprocessFile) where
 
+import Preprocessor.Internal.AddPadding      (addPadding)
+import Preprocessor.Internal.Preprocess      (parseModuleWithCpp)
+import Preprocessor.Internal.Types           (CabalFilePath, CppOptions (..),
+                                             ProjectDir, emptyCppOptions)
+
 import Control.Monad                         (filterM, (>=>))
 import Data.List                             (inits, isSuffixOf)
 import Data.Maybe                            (catMaybes)
@@ -42,10 +46,6 @@ import Distribution.PackageDescription       (condLibrary, condTreeData,
                                              libBuildInfo)
 import Distribution.PackageDescription.Parse (readPackageDescription)
 import Distribution.Verbosity                (silent)
-import Preprocessor.Internal.AddPadding      (addPadding)
-import Preprocessor.Internal.Preprocess      (parseModuleWithCpp)
-import Preprocessor.Internal.Types           (CabalFilePath, CppOptions (..),
-                                             ProjectDir, emptyCppOptions)
 import System.Directory                      (findFile, makeAbsolute)
 import System.Directory.Extra                (listContents)
 import System.FilePath.Find                  (always, extension, fileName, find,
@@ -60,8 +60,10 @@ getLibExposedModulesPath :: CabalFilePath -> IO [FilePath]
 getLibExposedModulesPath cabalPath = do
   packageDesc <- readPackageDescription silent cabalPath
   let Just lib = condTreeData <$> condLibrary packageDesc
-      modules = map (++".hs") . map toFilePath . exposedModules $ lib
-      sourceDirs = map (takeDirectory cabalPath </>) . ("" :) . hsSourceDirs $ libBuildInfo lib
+      modules = map (++ ".hs") . map toFilePath . exposedModules $ lib
+      sourceDirs =
+        map (takeDirectory cabalPath </>) . ("" :) . hsSourceDirs $
+        libBuildInfo lib
   mbModulesPath <- mapM (findFile sourceDirs) modules
   return (catMaybes mbModulesPath)
 
@@ -69,11 +71,17 @@ getLibExposedModulesPath cabalPath = do
 -- the preprocessed file. The line numbering of the original file is preserved.
 preprocessFile :: FilePath -> IO String
 preprocessFile fp = do
-  projectDir   <- findProjectDirectory fp
-  macroFile    <- fromGenericFileToCppMacroFile fp
-  includeFiles <- allDotHFiles projectDir >>= mapM (\x -> takeDirectory <$> makeAbsolute x)
-  rawString    <- parseModuleWithCpp (emptyCppOptions { cppFile    = [macroFile]
-                                                      , cppInclude = includeFiles }) fp
+  projectDir <- findProjectDirectory fp
+  macroFile <- fromGenericFileToCppMacroFile fp
+  includeFiles <-
+    allDotHFiles projectDir >>= mapM (\x -> takeDirectory <$> makeAbsolute x)
+  rawString <-
+    parseModuleWithCpp
+      (emptyCppOptions
+       { cppFile = [macroFile]
+       , cppInclude = includeFiles
+       })
+      fp
   return $ addPadding fp rawString
 
 --------------------------------------------------------------------------------
@@ -91,19 +99,20 @@ fromGenericFileToCppMacroFile fp = do
 -- filepath of a file in the project.
 findProjectDirectory :: FilePath -> IO ProjectDir
 findProjectDirectory fileInProject = do
-  let splittedPath  = splitPath fileInProject
+  let splittedPath = splitPath fileInProject
       possiblePaths = map joinPath $ init $ tail $ inits splittedPath
   head <$> filterM containsCabalFile possiblePaths
- where
-   containsCabalFile :: FilePath -> IO Bool
-   containsCabalFile dir = any (".cabal" `isSuffixOf`) <$> listContents dir
+  where
+    containsCabalFile :: FilePath -> IO Bool
+    containsCabalFile dir = any (".cabal" `isSuffixOf`) <$> listContents dir
 
 -- | Given a directory (which is meant to be the project directory), gives back
 -- the dist-dir contained in it (it's important because it contains all the
 -- macros).
 findDistDir :: ProjectDir -> IO FilePath
 findDistDir fp = init <$> readCreateProcess (shell cmd) ""
-  where cmd = "cd " ++ fp ++ "; " ++ "cd $(stack path --dist-dir)" ++ "; pwd"
+  where
+    cmd = "cd " ++ fp ++ "; " ++ "cd $(stack path --dist-dir)" ++ "; pwd"
 
 -- | Given the project directory, finds the directories in which additional .h
 -- files (which could be additional macros) are stored.

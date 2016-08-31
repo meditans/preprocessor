@@ -77,10 +77,10 @@ data LineMarker = LineMarker { beginsAtLine :: Int
 -- >>> isLineMarker "# 42 \"/path/to/file\""
 -- True
 isLineMarker :: String -> Bool
-isLineMarker (words -> hash:number:fp:_) =    hash == "#"
-                                           && all isDigit number
-                                           && isPrefixOf "\"" fp
-                                           && isSuffixOf "\"" fp
+isLineMarker (words -> hash:number:fp:_) = hash == "#"
+                                        && all isDigit number
+                                        && isPrefixOf "\"" fp
+                                        && isSuffixOf "\"" fp
 isLineMarker _                           = False
 
 -- |
@@ -88,7 +88,8 @@ isLineMarker _                           = False
 -- LineMarker {beginsAtLine = 42, filePath = "/path/to/file"}
 parseLineMarker :: String -> LineMarker
 parseLineMarker s = LineMarker (read $ words s !! 1) (unquote $ words s !! 2)
-  where unquote = tail . init
+  where
+    unquote = tail . init
 
 -- | A 'CppOutputComponent' is constituted by a 'LineMarker' and the block of
 -- code till the next 'LineMarker'.
@@ -103,12 +104,15 @@ data CppOutputComponent = CppOutputComponent { lineMarker  :: LineMarker
 -- | Given the lines of a file, parses the CppOutputComponents. Note that a file
 -- that doesn't need cpp preprocessing doesn't have any 'LineMarker'. In that
 -- case a dummy component is created, with an empty path.
+
 parseCppOutputComponents :: [String] -> [CppOutputComponent]
 parseCppOutputComponents ss
-  | any isLineMarker ss = flip repeatedly ss $ \ls ->
-      let (content, rest) = span (not . isLineMarker) (tail ls)
-          cppComponent = CppOutputComponent (parseLineMarker $ head ls) content
-      in (cppComponent, rest)
+  | any isLineMarker ss =
+    flip repeatedly ss $
+    \ls ->
+       let (content, rest) = span (not . isLineMarker) (tail ls)
+           cppComponent = CppOutputComponent (parseLineMarker $ head ls) content
+       in (cppComponent, rest)
   | otherwise = [CppOutputComponent (LineMarker 1 "") ss]
 
 -- | Discard the parts of cpp output which correspond to cpp include files. If
@@ -116,8 +120,9 @@ parseCppOutputComponents ss
 -- the components relative to our file other than the first (which has no real
 -- meaning).
 discardUnusefulComponents :: FilePath -> [CppOutputComponent] -> [CppOutputComponent]
-discardUnusefulComponents _ []  = error
-  "The function discardUnusefulComponents expects a non-empty list of components"
+discardUnusefulComponents _ [] =
+  error
+    "The function discardUnusefulComponents expects a non-empty list of components"
 discardUnusefulComponents _ [c] = [c]
 discardUnusefulComponents fp cs = filter ((== fp) . filePath . lineMarker) cs
 
@@ -129,3 +134,4 @@ reconstructSource = sourceBlock . foldr1 combine
     combine (CppOutputComponent lm1 c1) (CppOutputComponent lm2 c2) =
       let padding = (beginsAtLine lm2 - beginsAtLine lm1 - length c1)
       in CppOutputComponent lm1 (c1 ++ replicate padding "" ++ c2)
+

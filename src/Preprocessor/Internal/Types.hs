@@ -27,16 +27,17 @@ module Preprocessor.Internal.Types
 -- <https://gcc.gnu.org/onlinedocs/gcc/Preprocessor-Options.html here> is the
 -- part of the gcc manual corresponding to the preprocessing options.
 data CppOptions = CppOptions
-                { cppDefine  :: [String]
-                -- ^ CPP #define macros. Corresponds to a @-D@ option for the
-                -- cpp program.
-                , cppInclude :: [FilePath]
-                -- ^ CPP Includes directory. Corresponds to a @-I@ option for
-                -- the cpp program.
-                , cppFile    :: [FilePath]
-                -- ^ CPP pre-include file. Corresponds to a @-include@ option
-                -- for the cpp program.
-                } deriving (Show)
+  { cppDefine :: [String]
+    -- ^ CPP #define macros. Corresponds to a @-D@ option for the
+    -- cpp program.
+  , cppInclude :: [FilePath]
+    -- ^ CPP Includes directory. Corresponds to a @-I@ option for
+    -- the cpp program.
+  , cppFile :: [FilePath]
+    -- ^ CPP pre-include file. Corresponds to a @-include@ option
+    -- for the cpp program.
+  } deriving (Show)
+
 
 -- |
 -- >>> emptyCppOptions
@@ -49,6 +50,7 @@ emptyCppOptions = CppOptions [] [] []
 --------------------------------------------------------------------------------
 
 -- | ProjectDir is the directory which contains the .cabal file for the project.
-type ProjectDir    = FilePath
+type ProjectDir = FilePath
+
 -- | The path of the main @.cabal@ file of the project.
 type CabalFilePath = FilePath

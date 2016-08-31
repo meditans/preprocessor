@@ -54,8 +54,8 @@ parseModuleWithCpp cppOptions file = GHC.runGhc (Just GHC.libdir) $ do
   let useCpp = GHC.xopt GHC.Opt_Cpp dflags
 #endif
   if useCpp
-  then getPreprocessedSrcDirect cppOptions file
-  else GHC.liftIO (readFile file)
+    then getPreprocessedSrcDirect cppOptions file
+    else GHC.liftIO (readFile file)
 
 -- | Given a config and a file, this function returns the correct dynFlags. For
 -- now, this is only used to check if the Cpp extension is enabled (see the test
@@ -64,12 +64,12 @@ parseModuleWithCpp cppOptions file = GHC.runGhc (Just GHC.libdir) $ do
 -- an entry point for ghc-api based analysis.
 initDynFlags :: GHC.GhcMonad m => FilePath -> m GHC.DynFlags
 initDynFlags file = do
-    dflags0 <- GHC.getSessionDynFlags
-    src_opts <- GHC.liftIO $ GHC.getOptionsFromFile dflags0 file
-    dflags1 <- fst3 <$> GHC.parseDynamicFilePragma dflags0 src_opts
-    let dflags2 = dflags1 { GHC.log_action = GHC.defaultLogAction }
-    void $ GHC.setSessionDynFlags dflags2
-    return dflags2
+  dflags0  <- GHC.getSessionDynFlags
+  src_opts <- GHC.liftIO $ GHC.getOptionsFromFile dflags0 file
+  dflags1  <- fst3 <$> GHC.parseDynamicFilePragma dflags0 src_opts
+  let dflags2 = dflags1 {GHC.log_action = GHC.defaultLogAction}
+  void $ GHC.setSessionDynFlags dflags2
+  return dflags2
 
 --------------------------------------------------------------------------------
 -- Wrapper around GHC's preprocess
