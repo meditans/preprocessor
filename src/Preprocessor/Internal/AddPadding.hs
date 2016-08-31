@@ -1,8 +1,8 @@
 {-# LANGUAGE ViewPatterns #-}
 
 {-|
-Module      : Preprocessor.Internal.CppOutput
-Description : Parsing of the Cpp output
+Module      : Preprocessor.Internal.AddPadding
+Description : Padding of the Cpp output
 Copyright   : (c) Carlo Nucera, 2016
 License     : BSD3
 Maintainer  : meditans@gmail.com
@@ -29,7 +29,7 @@ in `CppOutputComponents` (the source chunks between the linemarkers), and pad
 them with the appropriate amount of blank lines.
 -}
 
-module Preprocessor.Internal.CppOutput where
+module Preprocessor.Internal.AddPadding where
 
 import Data.Char       (isDigit)
 import Data.List       (isPrefixOf, isSuffixOf)

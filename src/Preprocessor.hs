@@ -42,7 +42,7 @@ import Distribution.PackageDescription       (condLibrary, condTreeData,
                                              libBuildInfo)
 import Distribution.PackageDescription.Parse (readPackageDescription)
 import Distribution.Verbosity                (silent)
-import Preprocessor.Internal.CppOutput
+import Preprocessor.Internal.AddPadding
 import Preprocessor.Internal.Preprocess      (parseModuleWithCpp)
 import Preprocessor.Internal.Types           (CabalFilePath, CppOptions (..),
                                              ProjectDir, emptyCppOptions)
