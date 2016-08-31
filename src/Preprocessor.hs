@@ -43,7 +43,7 @@ import Distribution.PackageDescription       (condLibrary, condTreeData,
 import Distribution.PackageDescription.Parse (readPackageDescription)
 import Distribution.Verbosity                (silent)
 import Preprocessor.Internal.CppOutput
-import Preprocessor.Internal.Parser          (parseModuleWithCpp)
+import Preprocessor.Internal.Preprocess      (parseModuleWithCpp)
 import Preprocessor.Internal.Types           (CabalFilePath, CppOptions (..),
                                              ProjectDir, emptyCppOptions)
 import System.Directory                      (findFile, makeAbsolute)
