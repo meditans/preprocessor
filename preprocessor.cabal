@@ -19,15 +19,15 @@ library
                      , Preprocessor.Internal.Types
                      , Preprocessor.Internal.AddPadding
   build-depends:       base >= 4.7 && < 5
-                     , Cabal
-                     , directory
-                     , extra
-                     , filemanip
-                     , filepath
-                     , ghc
-                     , ghc-paths
-                     , microlens
-                     , process
+                     , Cabal >= 1.22.8.0
+                     , directory >= 1.2.2.0
+                     , extra >= 1.4.10
+                     , filemanip >= 0.3.6.3
+                     , filepath >= 1.4.0.0
+                     , ghc >= 7.10.3
+                     , ghc-paths >= 0.1.0.9
+                     , microlens >= 0.4.4.3
+                     , process >= 1.2.3.0
   if impl(ghc >= 8.0)
     build-depends:     template-haskell
   default-language:    Haskell2010
@@ -37,13 +37,13 @@ test-suite preprocessor-test
   type:                exitcode-stdio-1.0
   hs-source-dirs:      test
   main-is:             Main.hs
-  build-depends:       base
-                     , directory
-                     , haskell-src-exts
-                     , hspec
-                     , preprocessor
-                     , process
-                     , temporary
+  build-depends:       base >= 4.7 && < 5
+                     , directory >= 1.2.2.0
+                     , haskell-src-exts >= 1.18.2
+                     , hspec >= 2.2
+                     , preprocessor == 0.1.0
+                     , process >= 1.2.3.0
+                     , temporary >= 1.2
   ghc-options:         -Wall -threaded -rtsopts -with-rtsopts=-N
   default-language:    Haskell2010
   ghc-options:         -Wall
