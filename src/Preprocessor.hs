@@ -44,8 +44,8 @@ import Distribution.PackageDescription.Parse (readPackageDescription)
 import Distribution.Verbosity                (silent)
 import Preprocessor.Internal.CppOutput
 import Preprocessor.Internal.Parser          (parseModuleWithCpp)
-import Preprocessor.Internal.Preprocess
-import Preprocessor.Internal.Types           (CabalFilePath, ProjectDir)
+import Preprocessor.Internal.Types           (CabalFilePath, CppOptions (..),
+                                             ProjectDir, emptyCppOptions)
 import System.Directory                      (findFile, makeAbsolute)
 import System.Directory.Extra                (listContents)
 import System.FilePath.Find                  (always, extension, fileName, find,

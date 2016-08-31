@@ -14,9 +14,7 @@ wrapper around Ghc's 'GHC.preprocess'.
 -}
 
 module Preprocessor.Internal.Preprocess
-   ( CppOptions(..)
-   , emptyCppOptions
-   , getPreprocessedSrcDirect
+   ( getPreprocessedSrcDirect
    ) where
 
 import Lens.Micro
@@ -31,31 +29,7 @@ import qualified GHC
 import qualified HscTypes       as GHC
 import qualified MonadUtils     as GHC
 
---------------------------------------------------------------------------------
--- Data types declaration
---------------------------------------------------------------------------------
-
--- | `CppOptions` represent the options which are passed, through the ghc api,
--- to the cpp preprocessing program. For reference,
--- <https://gcc.gnu.org/onlinedocs/gcc/Preprocessor-Options.html here> is the
--- part of the gcc manual corresponding to the preprocessing options.
-data CppOptions = CppOptions
-                { cppDefine  :: [String]
-                -- ^ CPP #define macros. Corresponds to a @-D@ option for the
-                -- cpp program.
-                , cppInclude :: [FilePath]
-                -- ^ CPP Includes directory. Corresponds to a @-I@ option for
-                -- the cpp program.
-                , cppFile    :: [FilePath]
-                -- ^ CPP pre-include file. Corresponds to a @-include@ option
-                -- for the cpp program.
-                } deriving (Show)
-
--- |
--- >>> emptyCppOptions
--- CppOptions {cppDefine = [], cppInclude = [], cppFile = []}
-emptyCppOptions :: CppOptions
-emptyCppOptions = CppOptions [] [] []
+import Preprocessor.Internal.Types
 
 --------------------------------------------------------------------------------
 -- Main functions

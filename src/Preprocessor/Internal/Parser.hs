@@ -15,6 +15,7 @@ module Preprocessor.Internal.Parser (parseModuleWithCpp) where
 import Control.Monad           (void)
 import Data.Tuple.Extra        (fst3)
 import Preprocessor.Internal.Preprocess
+import Preprocessor.Internal.Types
 
 import qualified DynFlags   as GHC
 import qualified GHC        hiding (parseModule)
