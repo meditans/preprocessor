@@ -23,13 +23,10 @@ the form:
 # linenum filename flags
 @
 
-As I didn't find an option to make @cpp@ output only blank lines, the following
-functions parse a file with linemarkers, substituting them with the correct
-amount of blank lines to preserve the line numbering of the original code.
-
-The file is separated in `CppOutputComponents`, which correspond to the chunks
-between the linemarkers, and reconstruct the file using only blank lines,
-so that line numbers between source and processed file match up.
+As cpp doesn't have an option to output only blank lines and keeping the line
+numbering, the following functions parse a file with linemarkers separating it
+in `CppOutputComponents` (the source chunks between the linemarkers), and pad
+them with the appropriate amount of blank lines.
 -}
 
 module Preprocessor.Internal.CppOutput where

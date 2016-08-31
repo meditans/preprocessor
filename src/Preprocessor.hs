@@ -1,5 +1,35 @@
 {-# LANGUAGE ViewPatterns #-}
 
+{-|
+Module      : Preprocessor
+Description : Preprocess the cpp of a haskell source to do static analysis
+Copyright   : (c) Carlo Nucera, 2016
+License     : BSD3
+Maintainer  : meditans@gmail.com
+Stability   : experimental
+Portability : POSIX
+
+Preprocessor preprocesses the cpp in the source of a haskell library (a task not
+usually done by parsing libraries) to prepare for a static analysis of the code,
+e.g. with
+<http://hackage.haskell.org/package/haskell-src-exts haskell-src-exts>.
+
+The design of the library is guided by two principles:
+
+  * Line numbering with the original file should be preserved: if a line isn't
+related to cpp preprocessing, it conserves its position. This is done to make
+eventual failings with the parsing library easier to locate.
+
+  * It should offer a very simple API, shielding the user from the understandings
+of how cabal options are passed around, and trying to automatically find all the
+required information in the project. The user is expected to use only the two
+functions in this module.
+
+Currently this tool __requires__ the library to have been built with stack (it
+searches for some files generated in @.stack-work@). In the future I'll
+probably lift this restriction (if you need it before, please open a ticket).
+The files marked as internal are exported for documentation purposes only.
+-}
 module Preprocessor (getLibExposedModulesPath, preprocessFile) where
 
 import Control.Monad                         (filterM, (>=>))
@@ -24,8 +54,8 @@ import System.FilePath.Posix                 (joinPath, splitPath,
                                              takeDirectory, (</>))
 import System.Process                        (readCreateProcess, shell)
 
--- | Given the cabal file, this returns all the exposed modules of the library,
--- if this is a library. This is one of the two main functions of the module.
+-- | Given the path to the cabal file, this returns the paths to all the exposed
+-- modules of the @library@ section.
 getLibExposedModulesPath :: CabalFilePath -> IO [FilePath]
 getLibExposedModulesPath cabalPath = do
   packageDesc <- readPackageDescription silent cabalPath
@@ -35,8 +65,8 @@ getLibExposedModulesPath cabalPath = do
   mbModulesPath <- mapM (findFile sourceDirs) modules
   return (catMaybes mbModulesPath)
 
--- | This is intended as the main function of the library. There is currently a
--- workaround in removing all the lines that begin with #
+-- | Given the path to a file in a stack-build project, returns the content of
+-- the preprocessed file. The line numbering of the original file is preserved.
 preprocessFile :: FilePath -> IO String
 preprocessFile fp = do
   projectDir   <- findProjectDirectory fp
