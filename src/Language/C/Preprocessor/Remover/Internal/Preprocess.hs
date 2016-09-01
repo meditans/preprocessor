@@ -1,7 +1,7 @@
 {-# LANGUAGE CPP, RecordWildCards #-}
 
 {-|
-Module      : Preprocessor.Internal.Preprocess
+Module      : Language.C.Preprocessor.Remover.Internal.Preprocess
 Description : Call GHC.preprocess at the Cpp phase
 Copyright   : (c) Carlo Nucera, 2016
 License     : BSD3
@@ -10,7 +10,7 @@ Stability   : experimental
 Portability : POSIX
 -}
 
-module Preprocessor.Internal.Preprocess
+module Language.C.Preprocessor.Remover.Internal.Preprocess
    (
    -- * Entry point for parsing
      parseModuleWithCpp
@@ -21,7 +21,7 @@ module Preprocessor.Internal.Preprocess
 import Control.Monad               (void)
 import Data.Tuple.Extra            (fst3)
 import Lens.Micro
-import Preprocessor.Internal.Types
+import Language.C.Preprocessor.Remover.Internal.Types
 
 #if __GLASGOW_HASKELL__ < 710
 import Control.Applicative ((<$>))

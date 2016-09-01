@@ -14,10 +14,10 @@ cabal-version:       >=1.10
 
 library
   hs-source-dirs:      src
-  exposed-modules:     Preprocessor
-                     , Preprocessor.Internal.Preprocess
-                     , Preprocessor.Internal.Types
-                     , Preprocessor.Internal.AddPadding
+  exposed-modules:     Language.C.Preprocessor.Remover
+                     , Language.C.Preprocessor.Remover.Internal.Preprocess
+                     , Language.C.Preprocessor.Remover.Internal.Types
+                     , Language.C.Preprocessor.Remover.Internal.AddPadding
   build-depends:       base >= 4.7 && < 5
                      , Cabal
                      , directory

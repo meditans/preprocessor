@@ -1,7 +1,7 @@
 {-# LANGUAGE ViewPatterns #-}
 
 {-|
-Module      : Preprocessor
+Module      : Language.C.Preprocessor.Remover
 Description : Preprocess cpp directives in haskell source code.
 Copyright   : (c) Carlo Nucera, 2016
 License     : BSD3
@@ -29,12 +29,18 @@ searches for some files generated in @.stack-work@). In the future I'll
 probably lift this restriction (if you need it before, please open a ticket).
 The files marked as internal are exported for documentation purposes only.
 -}
-module Preprocessor (getLibExposedModulesPath, preprocessFile) where
 
-import Preprocessor.Internal.AddPadding      (addPadding)
-import Preprocessor.Internal.Preprocess      (parseModuleWithCpp)
-import Preprocessor.Internal.Types           (CabalFilePath, CppOptions (..),
-                                             ProjectDir, emptyCppOptions)
+module Language.C.Preprocessor.Remover
+  ( getLibExposedModulesPath
+  , preprocessFile
+  ) where
+
+import Language.C.Preprocessor.Remover.Internal.AddPadding (addPadding)
+import Language.C.Preprocessor.Remover.Internal.Preprocess (parseModuleWithCpp)
+import Language.C.Preprocessor.Remover.Internal.Types      (CabalFilePath,
+                                                           CppOptions (..),
+                                                           ProjectDir,
+                                                           emptyCppOptions)
 
 import Control.Monad                         (filterM, (>=>))
 import Data.List                             (inits, isSuffixOf)

@@ -1,8 +1,8 @@
 module Main where
 
 import Language.Haskell.Exts
-import Preprocessor
-import Preprocessor.Internal.Types (CabalFilePath)
+import Language.C.Preprocessor.Remover
+import Language.C.Preprocessor.Remover.Internal.Types (CabalFilePath)
 import Test.Hspec
 
 import Control.Exception (bracket)

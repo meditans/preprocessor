@@ -1,7 +1,7 @@
 {-# LANGUAGE ViewPatterns #-}
 
 {-|
-Module      : Preprocessor.Internal.AddPadding
+Module      : Language.C.Preprocessor.Remover.Internal.AddPadding
 Description : Padding of the Cpp output
 Copyright   : (c) Carlo Nucera, 2016
 License     : BSD3
@@ -29,7 +29,7 @@ in `CppOutputComponents` (the source chunks between the linemarkers), and pad
 them with the appropriate amount of blank lines.
 -}
 
-module Preprocessor.Internal.AddPadding
+module Language.C.Preprocessor.Remover.Internal.AddPadding
   (
   -- * Entry point for padding
     addPadding

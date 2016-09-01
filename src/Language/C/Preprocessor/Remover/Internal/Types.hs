@@ -1,5 +1,5 @@
 {-|
-Module      : Preprocessor.Internal.Types
+Module      : Language.C.Preprocessor.Remover.Internal.Types
 Description : Common types
 Copyright   : (c) Carlo Nucera, 2016
 License     : BSD3
@@ -8,7 +8,7 @@ Stability   : experimental
 Portability : POSIX
 -}
 
-module Preprocessor.Internal.Types
+module Language.C.Preprocessor.Remover.Internal.Types
   (
   -- * Options for the cpp preprocessor
     CppOptions (..)
