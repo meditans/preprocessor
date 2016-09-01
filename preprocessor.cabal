@@ -1,14 +1,14 @@
 name:                preprocessor
-version:             0.1.0
-synopsis:            Remove cpp annotations to get the source ready for parsing
-description:         Please see README.md
+version:             0.1.0.0
+synopsis:            Remove cpp annotations to get the source ready for static analysis.
+description:         Remove cpp annotations using the configuration with which you build the package, to get the source ready for static analysis with a parsing library like haskell-src-exts.
 homepage:            http://github.com/meditans/preprocessor#readme
 license:             MIT
 license-file:        LICENSE              
 author:              Carlo Nucera
 maintainer:          meditans@gmail.com
 copyright:           2016 Carlo Nucera
-category:            Source Code Analysis
+category:            Source Code Analysis, CPP
 build-type:          Simple
 cabal-version:       >=1.10
 
