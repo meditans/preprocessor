@@ -1,13 +1,28 @@
 #+TITLE: Preprocessor
 
-This library preprocesses the cpp directives in haskell source code (a task not usually done by parsing libraries), to prepare it for static analysis, e.g. with [[http://hackage.haskell.org/package/haskell-src-exts][haskell-src-exts]].
+This library preprocesses the cpp directives in haskell source code (a task not
+usually done by parsing libraries), to prepare it for static analysis, e.g. with
+[[http://hackage.haskell.org/package/haskell-src-exts][haskell-src-exts]].
 
 The design of the library is guided by two principles:
 
-  * Line numbering with the original file should be preserved: if a line isn't related to cpp preprocessing, it conserves its position. This is done to make eventual failings with the parsing library easier to locate.
+  * Line numbering with the original file should be preserved: if a line isn't
+    related to cpp preprocessing, it conserves its position. This is done to
+    make eventual failings with the parsing library easier to locate.
 
-  * It should offer a very simple API, shielding the user from the understandings of how cabal options are passed around, and trying to automatically find all the required information in the project. The user is expected to use only the two functions in the module =Preprocessor=.
+  * It should offer a very simple API, shielding the user from the
+    understandings of how cabal options are passed around, and trying to
+    automatically find all the required information in the project. The user is
+    expected to use only the two functions in the module =Preprocessor=.
 
-Currently this tool *requires* the library to have been built with stack (it searches for some files generated in @.stack-work@). In the future I'll probably lift this restriction (if you need it before, please open a ticket). The files marked as internal are exported for documentation purposes only.
+Currently this tool *requires* the library to have been built with stack (it
+searches for some files generated in =.stack-work=). In the future I'll probably
+lift this restriction (if you need it before, please open a ticket). The files
+marked as internal are exported for documentation purposes only.
+
+*NEWS* After talking with Duncan Coutts at Munihac, we decided that this task
+could be better done by the cabal library itself with a =--only-configure= flag
+that could be implemented. So I'm keeping this library as a support for my
+=documentator= library, at least until I get around implementing that flag.
 
 If you have any problem, or suggestion for the library, please open an issue :).
